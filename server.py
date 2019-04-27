@@ -1,63 +1,32 @@
 import hashlib
 import hmac
 import json
-import os
+import sys
 import time
 import urllib.parse
 
 import requests
 
+from config import config, legal_config
 from flask import Flask, request
 from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
 
-config = {
-    'signing_secret': os.environ.get('SIGNING_SECRET'),
-    'target_webhook': os.environ.get('TARGET_WEBHOOK'),
-    'oauth_token': os.environ.get('OAUTH_TOKEN'),
-    'options': {
-        'default': {
-            'username':
-            'Abakus',
-            'icon_url':
-            'https://avatars2.githubusercontent.com/u/10448101?s=200&v=4'
-        },
-        'hovedstyret': {
-            'username':
-            'Hovedstyret',
-            'icon_url':
-            'https://thumbor.abakus.no/RGmrcG8YoEhhPKWY7suqAcMpaEA=/500x500/hs_ny_kY3AqO8.png'
-        }
-    },
-    'responses': {
-        'good': {
-            'text': 'Yeet',
-            'response_type': 'ephemeral'
-        },
-        'bad': {
-            'text': 'Neet',
-            'response_type': 'ephemeral'
-        },
-    }
-}
 
-
-def legal_config():
-    return config['signing_secret'] is not None and config[
-        'target_webhook'] is not None and config['oauth_token'] is not None
+class ValidationException(Exception):
+    pass
 
 
 def validate_request(signature, timestamp, request_body):
     if abs(time.time() - float(timestamp)) > 60 * 5:
-        return False, 'Old request'
+        raise ValidationException('Request too old')
     basestring = f'v0:{timestamp}:{request_body}'.encode('utf-8')
     computed_signature = 'v0=' + hmac.new(
         bytes(config['signing_secret'], 'utf-8'), basestring,
         hashlib.sha256).hexdigest()
     if not hmac.compare_digest(computed_signature, signature):
-        return False, "Signature didn't match"
-    return True, None
+        raise ValidationException("Signature didn't match")
 
 
 def post_json(url, body):
@@ -67,23 +36,32 @@ def post_json(url, body):
         headers={'Authorization': f'Bearer {config["oauth_token"]}'})
 
 
+def publish_message(body):
+    r = requests.post(
+        config['target_webhook'],
+        data=json.dumps({
+            **config['options']['default'],
+            **config['options'][body['submission']['post_as']], 'text':
+            body['submission']['message'],
+            'channel':
+            body['submission']['channel']
+        }))
+    if r.status_code == 200:
+        print(
+            f'{body["user"]["name"]} posted a message as {body["submission"]["post_as"]} to {body["submission"]["channel"]}'
+        )
+
+
 def handle_action(body):
-    if (body['callback_id'] == 'x-abakus'):
+    print(f'Handeling {body["type"]} request from {body["user"]["name"]}')
+    if (body['callback_id'] == 'x_publish'
+            and body['type'] == 'message_action'):
         open_dialog(body)
-    elif (body['callback_id'] == 'x-dialog'):
-        r = requests.post(
-            config['target_webhook'],
-            data=json.dumps({
-                **config['options']['default'],
-                **config['options'][body['submission']['post_as']], 'text':
-                body['submission']['message'],
-                'channel':
-                body['submission']['channel']
-            }))
-        # if (r.status_code == 200 and r.json()['ok']):
-        #     pass
-        # else:
-        #     pass
+    elif (body['callback_id'] == 'x_publish'
+          and body['type'] == 'dialog_submission'):
+        publish_message(body)
+    else:
+        raise Exception('Action type not recognized')
 
 
 def open_dialog(body):
@@ -92,7 +70,7 @@ def open_dialog(body):
             'trigger_id': body['trigger_id'],
             'dialog': {
                 'callback_id':
-                'x-dialog',
+                'x_publish',
                 'title':
                 'Publiser i Abakus',
                 'submit_label':
@@ -133,6 +111,13 @@ def fix_transfer_encoding():
         request.environ['wsgi.input_terminated'] = True
 
 
+@app.after_request
+def flush_streams(response):
+    sys.stdout.flush()
+    sys.stderr.flush()
+    return response
+
+
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 def main_route(path):
     return json.dumps({
@@ -145,15 +130,19 @@ def main_route(path):
 @app.route('/', defaults={'path': ''}, methods=['POST'])
 def action_route(path):
     if not legal_config():
-        return 'Not configured right', 400
-    slack_signature = request.headers['X-Slack-Signature']
-    timestamp = request.headers['X-Slack-Request-Timestamp']
-    request_body = request.get_data().decode('utf-8')
-    ok, err = validate_request(slack_signature, timestamp, request_body)
-    if not ok:
-        return err, 400
-    request_body = json.loads(urllib.parse.unquote_plus(request_body[8:]))
-    handle_action(request_body)
+        return '', 400
+
+    try:
+        slack_signature = request.headers['X-Slack-Signature']
+        timestamp = request.headers['X-Slack-Request-Timestamp']
+        request_body = request.get_data().decode('utf-8')
+        validate_request(slack_signature, timestamp, request_body)
+
+        request_body = json.loads(urllib.parse.unquote_plus(request_body[8:]))
+        handle_action(request_body)
+    except Exception as e:
+        print(f'Exception during handle: {str(e)}')
+        return '', 400
 
     return '', 200
 
