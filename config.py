@@ -17,6 +17,9 @@ config = {
         },
         'hovedstyret': {
             'username': 'Hovedstyret',
+        },
+        'bedriftskontakt': {
+            'username': 'Bedriftskontakt',
         }
     },
     'responses': {
@@ -28,6 +31,48 @@ config = {
             'text': 'Neet',
             'response_type': 'ephemeral'
         },
+    },
+    'dialogs': {
+        'post_message': lambda body: {
+            'trigger_id': body['trigger_id'],
+            'dialog': {
+                'callback_id':
+                'x_publish',
+                'title':
+                'Publiser i Abakus',
+                'submit_label':
+                'Publiser',
+                'elements': [{
+                    'type': 'textarea',
+                    'label': 'Melding',
+                    'name': 'message',
+                    'value': body['message']['text']
+                },
+                             {
+                                 'type': 'text',
+                                 'label': 'Kanal (typ #general)',
+                                 'name': 'channel',
+                             },
+                             {
+                                 'label':
+                                 'Post som',
+                                 'type':
+                                 'select',
+                                 'name':
+                                 'post_as',
+                                 'options': [
+                                     {
+                                         'label': 'Hovedstyret',
+                                         'value': 'hovedstyret'
+                                     },
+                                     {
+                                         'label': 'Bedriftskontakt',
+                                         'value': 'bedriftskontakt'
+                                     },
+                                 ]
+                             }]
+            }
+        }
     }
 }
 

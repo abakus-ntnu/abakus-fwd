@@ -65,43 +65,8 @@ def handle_action(body):
 
 
 def open_dialog(body):
-    post_json(
-        'https://slack.com/api/dialog.open', {
-            'trigger_id': body['trigger_id'],
-            'dialog': {
-                'callback_id':
-                'x_publish',
-                'title':
-                'Publiser i Abakus',
-                'submit_label':
-                'Publiser',
-                'elements': [{
-                    'type': 'textarea',
-                    'label': 'Melding',
-                    'name': 'message',
-                    'value': body['message']['text']
-                },
-                             {
-                                 'type': 'text',
-                                 'label': 'Kanal (typ #general)',
-                                 'name': 'channel',
-                             },
-                             {
-                                 'label':
-                                 'Post som',
-                                 'type':
-                                 'select',
-                                 'name':
-                                 'post_as',
-                                 'options': [
-                                     {
-                                         'label': 'Hovedstyret',
-                                         'value': 'hovedstyret'
-                                     },
-                                 ]
-                             }]
-            }
-        })
+    post_json('https://slack.com/api/dialog.open',
+              config['dialogs']['post_message'](body))
 
 
 @app.before_request
