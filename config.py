@@ -9,7 +9,7 @@ config = {
             'username':
             'Abakus',
             'icon_url':
-            'https://avatars2.githubusercontent.com/u/10448101?s=200&v=4',
+            'https://github.com/JonasBak/abakus-fwd/blob/master/icons/abakule.png?raw=true',
             'link_names':
             True,
             "unfurl_links":
@@ -17,9 +17,13 @@ config = {
         },
         'hovedstyret': {
             'username': 'Hovedstyret',
+            'icon_url':
+            'https://github.com/JonasBak/abakus-fwd/blob/master/icons/hs.png?raw=true',
         },
         'bedriftskontakt': {
             'username': 'Bedriftskontakt',
+            'icon_url':
+            'https://github.com/JonasBak/abakus-fwd/blob/master/icons/bedkom.png?raw=true',
         }
     },
     'responses': {

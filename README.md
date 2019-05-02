@@ -1,4 +1,4 @@
-# cross-publish
+# abakus-fwd
 
 > Post messages across Slack workspaces, a docker image built to be deployed as a function in OpenFaaS
 
@@ -9,5 +9,5 @@ The container needs the following environment variables to work:
 
 Start and run the image locally: 
 ```
-docker build -t x-publish . && docker run --rm -p 4000:8080 --env="SIGNING_SECRET=BLABLABLA" --env="TARGET_WEBHOOK=BLABLABLA" --env="OAUTH_TOKEN=BLABLABLA" x-publish
+docker build -t abakus-fwd . && docker run --rm -p 4000:8080 --env="SIGNING_SECRET=BLABLABLA" --env="TARGET_WEBHOOK=BLABLABLA" --env="OAUTH_TOKEN=BLABLABLA" abakus-fwd
 ```
