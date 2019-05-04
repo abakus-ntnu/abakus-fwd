@@ -26,16 +26,6 @@ config = {
             'https://github.com/JonasBak/abakus-fwd/blob/master/icons/bedkom.png?raw=true',
         }
     },
-    'responses': {
-        'good': {
-            'text': 'Yeet',
-            'response_type': 'ephemeral'
-        },
-        'bad': {
-            'text': 'Neet',
-            'response_type': 'ephemeral'
-        },
-    },
     'dialogs': {
         'post_message': lambda body: {
             'trigger_id': body['trigger_id'],

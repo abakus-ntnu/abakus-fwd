@@ -50,6 +50,10 @@ def publish_message(body):
         print(
             f'{body["user"]["name"]} posted a message as {body["submission"]["post_as"]} to {body["submission"]["channel"]}'
         )
+    else:
+        raise Exception(
+            f'{body["user"]["name"]} was unable to post to {body["submission"]["channel"]}'
+        )
 
 
 def handle_action(body):
@@ -86,9 +90,7 @@ def flush_streams(response):
 @app.route('/', defaults={'path': ''}, methods=['GET'])
 def main_route(path):
     return json.dumps({
-        'signing_secret': config['signing_secret'] is not None,
-        'target_webhook': config['target_webhook'] is not None,
-        'oauth_token': config['oauth_token'] is not None
+        'ok': legal_config(),
     }), 200
 
 
@@ -96,7 +98,6 @@ def main_route(path):
 def action_route(path):
     if not legal_config():
         return '', 400
-
     try:
         slack_signature = request.headers['X-Slack-Signature']
         timestamp = request.headers['X-Slack-Request-Timestamp']
