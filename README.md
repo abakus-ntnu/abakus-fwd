@@ -20,5 +20,5 @@ Can be deployed using `faas-cli deploy` to also set env variables.
 To use this with a new Slack app you need to:
 1. Enable Interactivity in your app
 2. Set the Request URL to where this app is running
-3. Create a new action whith callback ID as `x_publish`
+3. Create a new shortcut (on messages), pick a name and description, and set the callback ID to `x_publish`
 4. Check that your app has the appropriate permission scopes ("Add slash commands and add actions to messages (and view related content)")
