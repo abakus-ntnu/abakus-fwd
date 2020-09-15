@@ -63,6 +63,10 @@ config = {
                                          'label': 'Bedriftskontakt',
                                          'value': 'bedriftskontakt'
                                      },
+                                     {
+                                         'label': 'Abakus',
+                                         'value': 'default'
+                                     },
                                  ]
                              }]
             }
