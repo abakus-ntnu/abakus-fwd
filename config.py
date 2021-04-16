@@ -1,108 +1,83 @@
 import os
 
-BASE_URL = "https://github.com/abakus-ntnu/abakus-fwd/tree/2021/icons/"
+def get_URL(name):
+    return (
+        "https://github.com/abakus-ntnu/abakus-fwd/blob/2021/icons/"
+        + name
+        + ".png?raw=true"
+    )
+
+
 OPTIONS = {
-    "abakus": {
+    "default": {
         "username": "Abakus",
-        "icon_url": BASE_URL + "abakule.png",
+        "icon_url": get_URL("abakule"),
         "link_names": True,
         "unfurl_links": True,
     },
     "hovedstyret": {
         "username": "Hovedstyret",
-        "icon_url": BASE_URL + "hs.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("hs"),
     },
     "inter": {
         "username": "INTER",
-        "icon_url": BASE_URL + "inter.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("inter"),
     },
     "media": {
         "username": "MEDIA",
-        "icon_url": BASE_URL + "media.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("media"),
     },
     "sosial": {
         "username": "SOSIAL",
-        "icon_url": BASE_URL + "sosial.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("sosial"),
     },
     "bedriftskontakt": {
         "username": "Bedriftskontakt",
-        "icon_url": BASE_URL + "bedkom.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("bedkom"),
     },
     "fondstyret": {
         "username": "Fondstyret",
-        "icon_url": BASE_URL + "fondstyret.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("fondstyret"),
     },
     "arrkom": {
         "username": "Arrkom",
-        "icon_url": BASE_URL + "arrkom.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("arrkom"),
     },
     "backup": {
         "username": "backup",
-        "icon_url": BASE_URL + "backup.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("backup"),
     },
     "bedkom": {
         "username": "Bedkom",
-        "icon_url": BASE_URL + "bedkom.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("bedkom"),
     },
     "fagkom": {
         "username": "Fagkom",
-        "icon_url": BASE_URL + "fagkom.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("fagkom"),
     },
     "webkom": {
         "username": "Webkom",
-        "icon_url": BASE_URL + "webkom.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("webkom"),
     },
     "koskom": {
         "username": "Koskom",
-        "icon_url": BASE_URL + "koskom.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("koskom"),
     },
     "labamba": {
         "username": "LaBamba",
-        "icon_url": BASE_URL + "labamba.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("labamba"),
     },
     "pr": {
         "username": "PR",
-        "icon_url": BASE_URL + "pr.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("sosial"),
     },
     "readme": {
         "username": "readme",
-        "icon_url": BASE_URL + "readme.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("readme"),
     },
     "revy": {
         "username": "Revyen",
-        "icon_url": BASE_URL + "revy.png",
-        "link_names": True,
-        "unfurl_links": True,
+        "icon_url": get_URL("revy"),
     },
 }
 
@@ -111,6 +86,7 @@ config = {
     "signing_secret": os.environ.get("SIGNING_SECRET"),
     "target_webhook": os.environ.get("TARGET_WEBHOOK"),
     "oauth_token": os.environ.get("OAUTH_TOKEN"),
+    "channel_id": os.environ.get("CHANNEL_ID"),
     "options": OPTIONS,
     "dialogs": {
         "post_message": lambda body: {
