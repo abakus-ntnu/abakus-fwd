@@ -2,7 +2,7 @@ import os
 
 def get_URL(name):
     return (
-        "https://github.com/abakus-ntnu/abakus-fwd/blob/2021/icons/"
+        "https://github.com/abakus-ntnu/abakus-fwd/blob/master/icons/"
         + name
         + ".png?raw=true"
     )
