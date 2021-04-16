@@ -1,0 +1,25 @@
+---
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: docker
+    image: plugins/docker
+    when:
+      event: [push]
+      branch:
+        - master
+    settings:
+      registry: https://registry.webkom.dev
+      repo: registry.webkom.dev/webkom/abakus-fwd
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+      tags:
+        - ${DRONE_BRANCH}-${DRONE_COMMIT_SHA:0:7}
+
+---
+kind: signature
+hmac: b51363bc1e7dd4be4df79a1f70b847c039aa929b9ed8941140b47d36143e15e5
