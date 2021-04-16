@@ -18,8 +18,9 @@ steps:
       password:
         from_secret: docker_password
       tags:
-        - ${DRONE_BRANCH}-${DRONE_COMMIT_SHA:0:7}
+        - latest
+        - version-${DRONE_COMMIT_SHA:0:7}
 
 ---
 kind: signature
-hmac: b51363bc1e7dd4be4df79a1f70b847c039aa929b9ed8941140b47d36143e15e5
+hmac: de38fa1906d12a8a30fc01b1461e2bb552b538670633e2baf91c1ed6db180d8d
