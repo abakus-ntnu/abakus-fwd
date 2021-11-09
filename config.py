@@ -1,5 +1,6 @@
 import os
 
+
 def get_URL(name):
     return (
         "https://github.com/abakus-ntnu/abakus-fwd/blob/master/icons/"
@@ -84,52 +85,84 @@ OPTIONS = {
 
 config = {
     "signing_secret": os.environ.get("SIGNING_SECRET"),
-    "target_webhook": os.environ.get("TARGET_WEBHOOK"),
     "oauth_token": os.environ.get("OAUTH_TOKEN"),
-    "channel_id": os.environ.get("CHANNEL_ID"),
-    "options": OPTIONS,
-    "dialogs": {
-        "post_message": lambda body: {
-            "trigger_id": body["trigger_id"],
-            "dialog": {
-                "callback_id": "x_publish",
-                "title": "Publiser i Abakus",
-                "submit_label": "Publiser",
-                "elements": [
-                    {
-                        "type": "textarea",
-                        "label": "Melding",
-                        "name": "message",
-                        "value": body["message"]["text"],
-                    },
-                    {
-                        "type": "text",
-                        "label": "Kanal (typ #general)",
-                        "name": "channel",
-                    },
-                    {
-                        "label": "Post som",
-                        "type": "select",
-                        "name": "post_as",
-                        "options": [
+    "actions": {
+        "x_publish": {
+            "channel_id": os.environ.get("CHANNEL_ID"),
+            "options": OPTIONS,
+            "dialogs": {
+                "post_message": lambda body: {
+                    "trigger_id": body["trigger_id"],
+                    "dialog": {
+                        "callback_id": "x_publish",
+                        "title": "Publiser i Abakus",
+                        "submit_label": "Publiser",
+                        "elements": [
                             {
-                                "label": v["username"],
-                                "value": k,
-                            }
-
-                            for (k, v) in OPTIONS.items()
+                                "type": "textarea",
+                                "label": "Melding",
+                                "name": "message",
+                                "value": body["message"]["text"],
+                            },
+                            {
+                                "type": "text",
+                                "label": "Kanal (typ #general)",
+                                "name": "channel",
+                            },
+                            {
+                                "label": "Post som",
+                                "type": "select",
+                                "name": "post_as",
+                                "options": [
+                                    {
+                                        "label": v["username"],
+                                        "value": k,
+                                    }
+                                    for (k, v) in OPTIONS.items()
+                                ],
+                            },
                         ],
                     },
-                ],
+                }
             },
-        }
+            "publish_message": lambda config, body: {
+                **config["options"]["default"],
+                **config["options"][body["submission"]["post_as"]],
+                "text": body["submission"]["message"],
+                "channel": body["submission"]["channel"],
+            },
+        },
+        "anon_abaquery": {
+            "channel_id": os.environ.get("CHANNEL_ID_ABAQUERY"),
+            "dialogs": {
+                "post_message": lambda body: {
+                    "trigger_id": body["trigger_id"],
+                    "dialog": {
+                        "callback_id": body["callback_id"],
+                        "title": "Anonymt spørsmål",
+                        "submit_label": "Publiser",
+                        "elements": [
+                            {
+                                "type": "textarea",
+                                "label": "Melding",
+                                "name": "message",
+                            },
+                        ],
+                    },
+                }
+            },
+            "publish_message": lambda config, body: {
+                "username": "Anonym bruker",
+                "icon_url": get_URL("abakule"),
+                "link_names": True,
+                "unfurl_links": True,
+                "text": body["submission"]["message"],
+                "channel": config["channel_id"],
+            },
+        },
     },
 }
 
 
 def legal_config():
-    return (
-        config["signing_secret"] is not None
-        and config["target_webhook"] is not None
-        and config["oauth_token"] is not None
-    )
+    return config["signing_secret"] is not None and config["oauth_token"] is not None
