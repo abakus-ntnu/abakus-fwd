@@ -7,9 +7,10 @@ steps:
   - name: docker
     image: plugins/docker
     when:
-      event: [push]
+      event: push
       branch:
         - master
+      status: success
     settings:
       registry: https://registry.webkom.dev
       repo: registry.webkom.dev/webkom/abakus-fwd
@@ -19,8 +20,29 @@ steps:
         from_secret: docker_password
       tags:
         - latest
-        - version-${DRONE_COMMIT_SHA:0:7}
+
+  - name: Deploy
+    image: abakus/ansible-deploy
+    when:
+      branch:
+        - master
+      event: push
+      status: success
+    settings:
+      playbook: /infrastructure/esas/playbooks/deploy.yml
+      repository:
+        from_secret: infra_repository
+      tags:
+        - faas-fn
+      limit: esas
+      inventory: /infrastructure/inventory
+      vault_password:
+        from_secret: ansible_vault_password
+      private_key:
+        from_secret: infra_deploy_key
+    depends_on:
+      - docker
 
 ---
 kind: signature
-hmac: de38fa1906d12a8a30fc01b1461e2bb552b538670633e2baf91c1ed6db180d8d
+hmac: f95b40b054d641d2a9cf44a653186d956ac44b622d65c067c397ed0aab367a90
