@@ -5,12 +5,16 @@ import logging
 import sys
 import time
 import urllib.parse
+import os
 
 import requests
 from flask import Flask, request
 from gevent.pywsgi import WSGIServer
 
 from config import config, legal_config
+
+if os.environ.get("DEBUG", False):
+    logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
@@ -35,38 +39,41 @@ def validate_request(signature, timestamp, request_body):
 
 
 def post_json(url, body):
-    return requests.post(
+    res = requests.post(
         url, json=body, headers={"Authorization": f'Bearer {config["oauth_token"]}'}
     )
+    logging.debug(f"Response: {res.json()}")
+    if not res.ok:
+        logging.warn(f"Recieved non-OK response: {res.json()}")
+
+    return res
 
 
-def publish_message(body):
-    r = requests.post(
-        config["target_webhook"],
-        data=json.dumps(
-            {
-                **config["options"]["default"],
-                **config["options"][body["submission"]["post_as"]],
-                "text": body["submission"]["message"],
-                "channel": body["submission"]["channel"],
-            }
-        ),
+def publish_message(body, action):
+    r = post_json(
+        "https://slack.com/api/chat.postMessage",
+        config["actions"][action]["publish_message"](config["actions"][action], body),
     )
 
+    logging.debug(f"Received response: {r.json()}")
     if r.status_code == 200:
         print(
-            f'{body["user"]["name"]} posted a message as {body["submission"]["post_as"]} to {body["submission"]["channel"]}'
+            f'{body["user"]["name"]} posted a message with the parameters: {body["submission"]}'
         )
     else:
         raise Exception(
-            f'{body["user"]["name"]} was unable to post to {body["submission"]["channel"]}'
+            f'{body["user"]["name"]} was unable to post the message: {body["submission"]}'
         )
 
 
 def handle_action(body):
-    print(f'Handeling {body["type"]} request from {body["user"]["name"]}')
+    action = body["callback_id"]
+    print(f'Handling {body["type"]} request. Action is: {action}')
 
-    if body["channel"]["id"] != config["channel_id"]:
+    if (
+        "channel" in body
+        and body["channel"]["id"] != config["actions"][action]["channel_id"]
+    ):
         post_json(
             body["response_url"],
             {
@@ -74,17 +81,22 @@ def handle_action(body):
                 "response_type": "ephemeral",
             },
         )
-    elif body["callback_id"] == "x_publish" and body["type"] == "message_action":
-        open_dialog(body)
-    elif body["callback_id"] == "x_publish" and body["type"] == "dialog_submission":
-        publish_message(body)
-    else:
+        return
+
+    if action not in config["actions"].keys():
         raise Exception("Action type not recognized")
 
+    if body["type"] in ["message_action", "shortcut"]:
+        open_dialog(body, action)
+    elif body["type"] == "dialog_submission":
+        publish_message(body, action)
 
-def open_dialog(body):
+
+def open_dialog(body, action):
+    logging.debug(f"Opening dialog for action: {action}")
     post_json(
-        "https://slack.com/api/dialog.open", config["dialogs"]["post_message"](body)
+        "https://slack.com/api/dialog.open",
+        config["actions"][action]["dialogs"]["post_message"](body),
     )
 
 
