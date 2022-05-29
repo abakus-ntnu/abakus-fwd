@@ -70,7 +70,7 @@ OPTIONS = {
     },
     "pr": {
         "username": "PR",
-        "icon_url": get_URL("sosial"),
+        "icon_url": get_URL("pr"),
     },
     "readme": {
         "username": "readme",
