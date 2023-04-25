@@ -2,10 +2,11 @@ import hashlib
 import hmac
 import json
 import logging
+import os
 import sys
 import time
 import urllib.parse
-import os
+from sqlite3 import connect, cursor, execute
 
 import requests
 from flask import Flask, request
@@ -66,6 +67,32 @@ def publish_message(body, action):
         )
 
 
+async def get_messages():
+    conversation_list = requests.get("https://slack.com/api/conversations.list")
+    channel_id = conversation_list.json()["channels"]["abaquery"]
+    message_history = requests.get(
+        "https://slack.com/api/conversations.history", {id: channel_id}
+    )
+    messages = message_history.json()["messages"]
+
+    return messages
+
+
+async def backup_message(body, action):
+    messages = await get_messages()
+    try:
+        con = connect("backup.db")
+        cur = con.cursor()
+    except Exception as e:
+        print(f"Exception initializing database: {str(e)}")
+        logging.exception("Error Database")
+
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS MELDINGER (id INTEGER PRIMARY KEY, message TEXT, thread VARCHAR(16));"
+    )
+    cur.executemany("INSERT INTO MELDINGER (id, message, thread) VALUES (?,?)", [(message.text, message.thread_ts) for message in messages])
+#Need to sanitize somehow
+
 def handle_action(body):
     action = body["callback_id"]
     print(f'Handling {body["type"]} request. Action is: {action}')
@@ -90,6 +117,9 @@ def handle_action(body):
         open_dialog(body, action)
     elif body["type"] == "dialog_submission":
         publish_message(body, action)
+    elif body["type"] == "backup":
+        backup_message(body, action)
+#Need to add the action somewhere
 
 
 def open_dialog(body, action):
