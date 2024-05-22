@@ -80,6 +80,10 @@ OPTIONS = {
         "username": "Revyen",
         "icon_url": get_URL("revy"),
     },
+    "ntnu": {
+        "username": "Informasjon fra NTNU",
+        "icon_url": get_URL("ntnu"),
+    },
 }
 
 
