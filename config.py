@@ -84,6 +84,10 @@ OPTIONS = {
         "username": "Informasjon fra NTNU",
         "icon_url": get_URL("ntnu"),
     },
+    "abacraft": {
+        "username": "AbaCraft",
+        "icon_url": get_URL("abacraft"),
+    },
 }
 
 
