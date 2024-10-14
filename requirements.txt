@@ -2,3 +2,4 @@ raven
 flask
 gevent
 requests
+sqlite3
