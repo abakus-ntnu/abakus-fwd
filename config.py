@@ -37,8 +37,8 @@ OPTIONS = {
         "icon_url": get_URL("bedkom"),
     },
     "fondstyret": {
-        "username": "Fondstyret",
-        "icon_url": get_URL("fondstyret"),
+        "username": "Fondsstyret",
+        "icon_url": get_URL("fondsstyret"),
     },
     "arrkom": {
         "username": "Arrkom",
